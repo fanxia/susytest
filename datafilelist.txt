@@ -1,3 +1,7 @@
+##13TeV25ns Datasets ntuples: GoldenJSON & SilverJSON##
+
+/store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/GoldenJSON/
+
 job_DoubleEG_Run2015C_Oct05_miniAOD.json
 job_DoubleEG_Run2015C_Oct05_miniAOD.lumi
 job_DoubleEG_Run2015C_Oct05_miniAOD.root
