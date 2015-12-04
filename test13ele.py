@@ -22,7 +22,7 @@ METSR2=ROOT.TH1F("METSR2","SR2:MET",100,0,1000)
 nEvent=eventTree.GetEntriesFast()
 print "nEvent=",nEvent
 n=0
-for i in range(0,1000000):
+for i in range(0,nEvent):
     eventTree.GetEntry(i)
 #    print "i=",i
 #    for a in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[a],"elept",eventTree.elePt[a]
@@ -37,12 +37,9 @@ for i in range(0,1000000):
             n+=1
             METSR1.Fill(eventTree.pfMET)
         elif eventTree.nPho>1:
-            if eventTree.phoEt[0]>eventTree.phoEt[1]: 
-                a1=eventTree.phoEt[0]
-                a2=eventTree.phoEt[1]
-            else:
-                a1=eventTree.phoEt[1]
-                a2=eventTree.phoEt[0]
+            #find the max two phoEt
+            a1=max(eventTree.phoEt)
+            a2=max([i for i in eventTree.phoEt if i!= a1])
             Leading2PhotonPt.Fill(a1)
             Trailing2PhotonPt.Fill(a2)
             METSR2.Fill(eventTree.pfMET)
