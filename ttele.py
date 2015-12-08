@@ -28,11 +28,12 @@ for i in range(0,1000):
     muPtmax=0
     if eventTree.nEle==1:
         SingleElePt.Fill(eventTree.elePt[0])
-        if eventTree.nMu>0:
-            for j in range(0,eventTree.nMu):
-                if muPtmax < eventTree.muPt[j]: muPtmax= eventTree.muPt[j]
-            print"---------muPtmax",muPtmax
-            MuPt.Fill(muPtmax)
+        print"------eleIDbit:",eventTree.eleIDbit[0],"--eleFiredTrgs:",eventTree.eleFiredTrgs[0],"--IDMVAtrg:",eventTree.eleIDMVATrg[0]
+#        if eventTree.nMu>0:
+#            for j in range(0,eventTree.nMu):
+#                if muPtmax < eventTree.muPt[j]: muPtmax= eventTree.muPt[j]
+#            print"---------muPtmax",muPtmax
+#            MuPt.Fill(muPtmax)
 #        PhotonNum.Fill(eventTree.nPho)
 #        if eventTree.nPho==1:
 #            Leading1PhotonPt.Fill(eventTree.phoEt[0])
@@ -45,7 +46,7 @@ for i in range(0,1000):
 print "---------------------------------------"
 print "EventNumber = ",i
 #print "Single Muon EventNumber = ",n
-
+'''
 c=ROOT.TCanvas("c","Plots",800,800)
 c.cd()
 SingleElePt.Draw()
@@ -61,7 +62,6 @@ gPad.SetLogy()
 gPad.Update()
 c.Print("MuPt121.pdf","pdf")    
 
-'''
 c.Clear()
 PhotonNum.Draw()
 gPad.SetLogy()
