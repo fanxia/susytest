@@ -12,21 +12,23 @@ fl=TFile.Open('root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/d
 eventTree=fl.Get('ggNtuplizer/EventTree')
 
 SingleElePt=ROOT.TH1F("SingleElePt","SingleElePt",100,0,1000)
-SingleEleEta=ROOT.TH1F("SingleEleEta","SingleEleEta",50,-5,5)
+SingleEleEta=ROOT.TH1F("SingleEleEta","SingleEleEta",100,-5,5)
 PhotonNum=ROOT.TH1F("PhotonNum","Photon Number",5,0,5)
 Leading1PhotonPt=ROOT.TH1F("Leading1PhotonPt","LeadingPhoton_Pt",100,0,1000)
 Leading2PhotonPt=ROOT.TH1F("Leading2PhotonPt","LeadingPhoton_Pt",100,0,1000)
 Trailing2PhotonPt=ROOT.TH1F("Trailing2PhotonPt","TrailingPhoton_Pt",100,0,1000)
+Inv2Photon=ROOT.TH1F("Inv2Photon","Inv2Photon",100,0,500)
 METSR1=ROOT.TH1F("METSR1","SR1:MET",100,0,1000)
 METSR2=ROOT.TH1F("METSR2","SR2:MET",100,0,1000)
 nEvent=eventTree.GetEntriesFast()
 print "nEvent=",nEvent
 n=0
-for i in range(0,nEvent):
+for i in range(0,1000000):
     eventTree.GetEntry(i)
 #    print "i=",i
 #    for a in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[a],"elept",eventTree.elePt[a]
-    if eventTree.nEle==1 and eventTree.elePt[0]>30 and eventTree.nMu==0 and eventTree.nJet>2:
+# select exact one tight ele, no other lepton events
+    if eventTree.nEle==1 and eventTree.elePt[0]>30 and abs(eventTree.eleEta[0])<2.5 and abs(eventTree.eleD0[0])<0.02 and abs(eventTree.eleDz[0])<1.0  and eventTree.nMu==0 and eventTree.nJet>2:
         SingleElePt.Fill(eventTree.elePt[0])
         SingleEleEta.Fill(eventTree.eleEta[0])
         PhotonNum.Fill(eventTree.nPho)
@@ -42,6 +44,7 @@ for i in range(0,nEvent):
             a2=max([i for i in eventTree.phoEt if i!= a1])
             Leading2PhotonPt.Fill(a1)
             Trailing2PhotonPt.Fill(a2)
+            Inv2Photon.Fill(a1+a2)
             METSR2.Fill(eventTree.pfMET)
 print "---------------------------------------"
 print "EventNumber = ",i
@@ -87,6 +90,11 @@ Trailing2PhotonPt.SetTitle("SR2: TrailingPhoton; Et; Events")
 gPad.SetLogy()
 gPad.Update()
 c.Print("Elechannel/Trailing2PhotonPt.pdf","pdf")
+
+c.Clear()
+Inv2Photon.Draw()
+c.Print("Elechannel/InvmassSR2photon.pdf","pdf")
+
 
 c.Clear()
 METSR1.Draw()
