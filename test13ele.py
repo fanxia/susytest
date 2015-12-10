@@ -11,6 +11,8 @@ fl=TFile.Open('root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/d
 
 eventTree=fl.Get('ggNtuplizer/EventTree')
 
+v1=ROOT.TLorentzVector()
+v2=ROOT.TLorentzVector()
 SingleElePt=ROOT.TH1F("SingleElePt","SingleElePt",100,0,1000)
 SingleEleEta=ROOT.TH1F("SingleEleEta","SingleEleEta",100,-5,5)
 PhotonNum=ROOT.TH1F("PhotonNum","Photon Number",5,0,5)
@@ -23,7 +25,7 @@ METSR2=ROOT.TH1F("METSR2","SR2:MET",100,0,1000)
 nEvent=eventTree.GetEntriesFast()
 print "nEvent=",nEvent
 n=0
-for i in range(0,1000000):
+for i in range(0,100000):
     eventTree.GetEntry(i)
 #    print "i=",i
 #    for a in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[a],"elept",eventTree.elePt[a]
@@ -32,7 +34,7 @@ for i in range(0,1000000):
         SingleElePt.Fill(eventTree.elePt[0])
         SingleEleEta.Fill(eventTree.eleEta[0])
         PhotonNum.Fill(eventTree.nPho)
-
+#        print"---jetJetProbabilityBJetTags:",eventTree.jetJetProbabilityBJetTags[0],"--",eventTree.jetJetProbabilityBJetTags[1],"---jetpfCombinedMVABJetTags:",eventTree.jetpfCombinedMVABJetTags[0],"--",eventTree.jetpfCombinedMVABJetTags[1]
 #        for j in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[j],"elept",eventTree.elePt[0]
         if eventTree.nPho==1:
             Leading1PhotonPt.Fill(eventTree.phoEt[0])
@@ -40,11 +42,26 @@ for i in range(0,1000000):
             METSR1.Fill(eventTree.pfMET)
         elif eventTree.nPho>1:
             #find the max two phoEt
-            a1=max(eventTree.phoEt)
-            a2=max([i for i in eventTree.phoEt if i!= a1])
-            Leading2PhotonPt.Fill(a1)
-            Trailing2PhotonPt.Fill(a2)
-            Inv2Photon.Fill(a1+a2)
+            a1=0
+            a2=0
+            phoEt=eventTree.phoEt[0]
+            for k in range(eventTree.nPho):
+                if eventTree.phoEt[k]>phoEt: 
+                    a1=k
+                    phoEt=eventTree.phoEt[k]
+            phoEt=eventTree.phoEt[0]
+            for k in range(eventTree.nPho):
+                if eventTree.phoEt[k]>phoEt and k != a1: 
+                    a2=k
+                    phoEt=eventTree.phoEt[k]
+
+
+#            a2=max([i for i in eventTree.phoEt if i!= a1])
+            Leading2PhotonPt.Fill(eventTree.phoEt[a1])
+            Trailing2PhotonPt.Fill(eventTree.phoEt[a2])
+            v1.SetPtEtaPhiM(eventTree.phoEt[a1],eventTree.phoEta[a1],eventTree.phoPhi[a1],0.0)
+            v2.SetPtEtaPhiM(eventTree.phoEt[a2],eventTree.phoEta[a2],eventTree.phoPhi[a2],0.0)
+            Inv2Photon.Fill((v1+v2).M())
             METSR2.Fill(eventTree.pfMET)
 print "---------------------------------------"
 print "EventNumber = ",i
@@ -107,3 +124,4 @@ METSR2.Draw()
 gPad.SetLogy()
 gPad.Update()
 c.Print("Elechannel/METSR2.pdf","pdf")
+
