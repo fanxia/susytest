@@ -25,7 +25,7 @@ METSR2=ROOT.TH1F("METSR2","SR2:MET",100,0,1000)
 nEvent=eventTree.GetEntriesFast()
 print "nEvent=",nEvent
 n=0
-for i in range(0,100000):
+for i in range(0,1000000):
     eventTree.GetEntry(i)
 #    print "i=",i
 #    for a in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[a],"elept",eventTree.elePt[a]
@@ -68,7 +68,15 @@ print "EventNumber = ",i
 print "Single Ele EventNumber = ",n
 
 c=ROOT.TCanvas("c","Plots",800,800)
+
 c.cd()
+Inv2Photon.Draw()
+gPad.SetLogy()
+gPad.Update()
+c.Print("Elechannel/InvmassSR2photon.pdf","pdf")
+
+
+c.Clear()
 SingleElePt.Draw()
 gPad.SetLogy()
 gPad.Update()
@@ -108,9 +116,6 @@ gPad.SetLogy()
 gPad.Update()
 c.Print("Elechannel/Trailing2PhotonPt.pdf","pdf")
 
-c.Clear()
-Inv2Photon.Draw()
-c.Print("Elechannel/InvmassSR2photon.pdf","pdf")
 
 
 c.Clear()
