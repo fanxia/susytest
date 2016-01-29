@@ -6,8 +6,9 @@
 import ROOT
 from ROOT import *
 
-fl=TFile.Open('root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/GoldenJSON/job_data_ggNtuple_SingleElectron_Run2015D_05Oct2015_25ns_JSON_Golden_1560pb_miniAOD.root')
+#fl=TFile.Open('root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/GoldenJSON/job_data_ggNtuple_SingleElectron_Run2015D_05Oct2015_25ns_JSON_Golden_1560pb_miniAOD.root')
 
+fl=TFile.Open('data/SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD__data_example.root')
 
 eventTree=fl.Get('ggNtuplizer/EventTree')
 
@@ -25,46 +26,57 @@ METSR2=ROOT.TH1F("METSR2","SR2:MET",100,0,1000)
 nEvent=eventTree.GetEntriesFast()
 print "nEvent=",nEvent
 n=0
-for i in range(0,1000000):
+nhltpass=0
+for i in range(0,nEvent):
     eventTree.GetEntry(i)
 #    print "i=",i
 #    for a in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[a],"elept",eventTree.elePt[a]
+
+# -----------------HLT selection
+    hlt=(eventTree.HLTEleMuX%2**7)//(2**6)
+
+    if hlt== 1:
+        nhltpass+=1
+
+
+
 # select exact one tight ele, no other lepton events
-    if eventTree.nEle==1 and eventTree.elePt[0]>30 and abs(eventTree.eleEta[0])<2.5 and abs(eventTree.eleD0[0])<0.02 and abs(eventTree.eleDz[0])<1.0  and eventTree.nMu==0 and eventTree.nJet>2:
-        SingleElePt.Fill(eventTree.elePt[0])
-        SingleEleEta.Fill(eventTree.eleEta[0])
-        PhotonNum.Fill(eventTree.nPho)
+        if eventTree.nEle==1 and eventTree.elePt[0]>30 and abs(eventTree.eleEta[0])<2.5 and abs(eventTree.eleD0[0])<0.02 and abs(eventTree.eleDz[0])<1.0  and eventTree.nMu==0 and eventTree.nJet>2:
+            SingleElePt.Fill(eventTree.elePt[0])
+            SingleEleEta.Fill(eventTree.eleEta[0])
+            PhotonNum.Fill(eventTree.nPho)
 #        print"---jetJetProbabilityBJetTags:",eventTree.jetJetProbabilityBJetTags[0],"--",eventTree.jetJetProbabilityBJetTags[1],"---jetpfCombinedMVABJetTags:",eventTree.jetpfCombinedMVABJetTags[0],"--",eventTree.jetpfCombinedMVABJetTags[1]
 #        for j in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[j],"elept",eventTree.elePt[0]
-        if eventTree.nPho==1:
-            Leading1PhotonPt.Fill(eventTree.phoEt[0])
-            n+=1
-            METSR1.Fill(eventTree.pfMET)
-        elif eventTree.nPho>1:
+            if eventTree.nPho==1:
+                Leading1PhotonPt.Fill(eventTree.phoEt[0])
+                n+=1
+                METSR1.Fill(eventTree.pfMET)
+            elif eventTree.nPho>1:
             #find the max two phoEt
-            a1=0
-            a2=0
-            phoEt=eventTree.phoEt[0]
-            for k in range(eventTree.nPho):
-                if eventTree.phoEt[k]>phoEt: 
-                    a1=k
-                    phoEt=eventTree.phoEt[k]
-            phoEt=eventTree.phoEt[0]
-            for k in range(eventTree.nPho):
-                if eventTree.phoEt[k]>phoEt and k != a1: 
-                    a2=k
-                    phoEt=eventTree.phoEt[k]
-
+                a1=0
+                a2=0
+                phoEt=eventTree.phoEt[0]
+                for k in range(eventTree.nPho):
+                    if eventTree.phoEt[k]>phoEt: 
+                        a1=k
+                        phoEt=eventTree.phoEt[k]
+                phoEt=eventTree.phoEt[0]
+                for k in range(eventTree.nPho):
+                    if eventTree.phoEt[k]>phoEt and k != a1: 
+                        a2=k
+                        phoEt=eventTree.phoEt[k]
+                    
 
 #            a2=max([i for i in eventTree.phoEt if i!= a1])
-            Leading2PhotonPt.Fill(eventTree.phoEt[a1])
-            Trailing2PhotonPt.Fill(eventTree.phoEt[a2])
-            v1.SetPtEtaPhiM(eventTree.phoEt[a1],eventTree.phoEta[a1],eventTree.phoPhi[a1],0.0)
-            v2.SetPtEtaPhiM(eventTree.phoEt[a2],eventTree.phoEta[a2],eventTree.phoPhi[a2],0.0)
-            Inv2Photon.Fill((v1+v2).M())
-            METSR2.Fill(eventTree.pfMET)
+                Leading2PhotonPt.Fill(eventTree.phoEt[a1])
+                Trailing2PhotonPt.Fill(eventTree.phoEt[a2])
+                v1.SetPtEtaPhiM(eventTree.phoEt[a1],eventTree.phoEta[a1],eventTree.phoPhi[a1],0.0)
+                v2.SetPtEtaPhiM(eventTree.phoEt[a2],eventTree.phoEta[a2],eventTree.phoPhi[a2],0.0)
+                Inv2Photon.Fill((v1+v2).M())
+                METSR2.Fill(eventTree.pfMET)
 print "---------------------------------------"
 print "EventNumber = ",i
+print "nhltpass = ",nhltpass
 print "Single Ele EventNumber = ",n
 
 c=ROOT.TCanvas("c","Plots",800,800)
