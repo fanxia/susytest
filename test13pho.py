@@ -32,7 +32,7 @@ nEvent=eventTree.GetEntriesFast()
 print "nEvent=",nEvent
 n=0
 nhltpass=0
-for i in range(0,100000):
+for i in range(0,nEvent):
   eventTree.GetEntry(i)
   PhotonNum.Fill(eventTree.nPho)
 # -----------------HLT selection
