@@ -49,7 +49,7 @@ for i in range(0,nEvent):
 #        for j in range(0,eventTree.eleFiredTrgs.size()): print "eleFiredTrgs.size()",eventTree.eleFiredTrgs.size(),"---",eventTree.eleFiredTrgs[j],"elept",eventTree.elePt[0]
             if eventTree.nPho==1:
                 Leading1PhotonPt.Fill(eventTree.phoEt[0])
-                n+=1
+                 n+=1
                 METSR1.Fill(eventTree.pfMET)
             elif eventTree.nPho>1:
             #find the max two phoEt
