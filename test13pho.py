@@ -32,7 +32,7 @@ nEvent=eventTree.GetEntriesFast()
 print "nEvent=",nEvent
 n=0
 nhltpass=0
-for i in range(0,nEvent):
+for i in range(0,nEvent  ):
   eventTree.GetEntry(i)
   PhotonNum.Fill(eventTree.nPho)
 # -----------------HLT selection
@@ -88,6 +88,7 @@ c=ROOT.TCanvas("c","Plots",800,800)
 
 c.cd()
 Inv2Photon.Draw("e")
+Inv2Photon.SetTitle("diPhoton invmass;m_{#gamma#gamma} (GeV);")
 gPad.SetLogy()
 gPad.Update()
 c.Print("Photon/Invmass2photon_hlt.pdf","pdf")
@@ -95,6 +96,7 @@ c.Print("Photon/Invmass2photon_hlt.pdf","pdf")
 
 c.Clear()
 diPhotonM.Draw("e")
+diPhotonM.SetTitle("diPhoton invmass;m_{#gamma#gamma} (GeV);")
 gPad.SetLogy()
 gPad.Update()
 c.Print("Photon/diPhotonM_hlt.pdf","pdf")
