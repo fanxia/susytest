@@ -1,6 +1,6 @@
 #!/bin/python
 # 2.15.2016 by Fan Xia
-# susy single electron to diphoton
+# susy single Muon channel
 
 
 import os
@@ -12,23 +12,23 @@ sw = ROOT.TStopwatch()
 sw.Start()
 
 chain_in = ROOT.TChain("ggNtuplizer/EventTree")
-chain_in.Add("root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/SilverJSON/job_data_ggNtuple_SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD.root")
-#chain_in.Add("data/SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD__data_example.root")
+#chain_in.Add("root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/SilverJSON/job_data_ggNtuple_SingleMuon_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD.root")
+chain_in.Add("data/SingleMuon_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD__data_example.root")
 chain_in.SetBranchStatus("tau*",0)
 n_events = chain_in.GetEntries()
 print"Total events for processing: ",n_events
 
-os.mkdir("SingleEle_v1",0755)
-os.chdir("SingleEle_v1")
+os.mkdir("SingleMu_v1",0755)
+os.chdir("SingleMu_v1")
 
 
 #------------
-SR1_SingleElePt = ROOT.TH1F("SR1_SingleElePt","SR1_SingleElePt",100,0,1000)
+SR1_SingleMuPt = ROOT.TH1F("SR1_SingleMuPt","SR1_SingleMuPt",100,0,1000)
 SinglePhoEt = ROOT.TH1F("SinglePhoEt","SinglePhoEt",100,0,1000)
 SR1MET = ROOT.TH1F("SR1MET","SR1MET",100,0,1000)
 SR1_nJet_nbJet = ROOT.TH2F("SR1_nJet_nbJet","SR1_nJet_nbJet",40,0,40,40,0,40)
 
-SR2_SingleElePt = ROOT.TH1F("SR2_SingleElePt","SR2_SingleElePt",100,0,1000)
+SR2_SingleMuPt = ROOT.TH1F("SR2_SingleMuPt","SR2_SingleMuPt",100,0,1000)
 diPhotonM = ROOT.TH1F("diPhotonM","diPhotonM",100,0,1000)
 SR2MET = ROOT.TH1F("SR2MET","SR2MET",100,0,1000)
 SR2nPho = ROOT.TH1F("SR2nPho","SR2nPho",5,0,5)
@@ -39,7 +39,7 @@ SR2_nJet_nbJet = ROOT.TH2F("SR2_nJet_nbJet","SR2_nJet_nbJet",40,0,40,40,0,40)
 #------------
 
 
-file_out = ROOT.TFile("reduced_singleEle.root","recreate")
+file_out = ROOT.TFile("reduced_singleMu.root","recreate")
 dir_out = file_out.mkdir("ggNtuplizer")
 #dir2_out = file_out.mkdir("ggNtuplizer_SR2")
 dir_out.cd()
@@ -52,7 +52,7 @@ pho1=ROOT.TLorentzVector()
 pho2=ROOT.TLorentzVector()
 
 n_hlt=0
-n_singleEle=0
+n_singleMu=0
 n_SR1=0
 n_SR2=0
 
@@ -61,34 +61,34 @@ for i in range(n_events):
     
     if i%100000 ==0:
         print "Processing entry ", i
-# -----------------1.HLT selection(HLT_Ele23_WPLoose_Gsf_v)
+# -----------------1.HLT selection(HLT_IsoMu24_eta2p1_v)  ID=24
 
-    hltele = chain_in.HLTEleMuX>>6&1
-    if hltele!=1:
+    hltmu = chain_in.HLTEleMuX>>24&1
+    if hltmu!=1:
         continue
     n_hlt+=1
 
 
-#-------------------1+2. only one tight ele
-    n_tightEle=0
-    n_looseEle=0
-    for e in range(chain_in.nEle):
-        if chain_in.elePt[e]>30 and (chain_in.eleIDbit[e]>>3&1)==1:
-            n_tightEle+=1
-            ele_ind=e
-        if chain_in.elePt[e]>10 and (chain_in.eleIDbit[e]>>1&1)==1:
-            n_looseEle+=1
-    if n_tightEle !=1 or n_looseEle !=1:
-        continue
-
+#-------------------1+2. only one tight muon
+    n_tightMu=0
     n_looseMu=0
     for m in range(chain_in.nMu):
-        if chain_in.muPt[m]>10 and abs(chain_in.muEta[m])<2.5 and chain_in.muIsLooseID[m]==1:
+        if chain_in.muPt[m]>30 and (chain_in.muIsTightID[m])==1 and abs(chain_in.muEta[m])<2.1:
+            n_tightMu+=1
+            mu_ind=m
+        if chain_in.muPt[m]>10 and (chain_in.muIsLooseID[m])==1 and abs(chain_in.muEta[m])<2.5:
             n_looseMu+=1
-    if n_looseMu !=0:
+    if n_tightMu !=1 or n_looseMu !=1:
         continue
 
-    n_singleEle+=1     
+    n_looseEle=0
+    for e in range(chain_in.nEle):
+        if chain_in.elePt[m]>10 and abs(chain_in.eleIDbit[e]>>1&1)==1:
+            n_looseEle+=1
+    if n_looseEle !=0:
+        continue
+
+    n_singleMu+=1     
 
 
 #--------------------1+2+3.at least 3 jets and 1 bjet
@@ -115,7 +115,7 @@ for i in range(n_events):
         SR1MET.Fill(chain_in.pfMET)
         SinglePhoEt.Fill(chain_in.phoEt[singlepho_ind])
         SR1_nJet_nbJet.Fill(n_jet,n_bjet)
-        SR1_SingleElePt.Fill(chain_in.elePt[ele_ind])
+        SR1_SingleMuPt.Fill(chain_in.muPt[mu_ind])
         tree1_out.Fill()
     elif len(pholist)>=2:    
         leadpho_ind=max(pholist,key=lambda x: chain_in.phoEt[x])
@@ -129,7 +129,7 @@ for i in range(n_events):
         SR2nPho.Fill(len(pholist))
         diPhotonM.Fill((pho1+pho2).M())
         SR2MET.Fill(chain_in.pfMET)
-        SR2_SingleElePt.Fill(chain_in.elePt[ele_ind])
+        SR2_SingleMuPt.Fill(chain_in.muPt[mu_ind])
         diPhotonM_MET.Fill((pho1+pho2).M(),chain_in.pfMET)
         LeadPhoEt.Fill(chain_in.phoEt[leadpho_ind])
         TrailPhoEt.Fill(chain_in.phoEt[trailpho_ind])
@@ -143,7 +143,7 @@ file_out.Close()
 print "----------------------"
 print "TotalEventNumber = ", n_events
 print "n_hlt pass = ", n_hlt
-print "n_singleEle pass = ", n_singleEle
+print "n_singleMu pass = ", n_singleMu
 print "n_SR1 = ", n_SR1
 print "n_SR2 = ", n_SR2
 print "----------------------"
@@ -151,18 +151,18 @@ print "----------------------"
 c=ROOT.TCanvas("c","Plots",800,800)
 c.cd()
 SR1MET.Draw()
-SR1MET.SetTitle("EleChannel SR1:MET;MET (GeV);")
+SR1MET.SetTitle("Muon Channel SR1:MET;MET (GeV);")
 gPad.SetLogy()
 gPad.Update()
 c.Print("SR1MET.pdf","pdf")
 
 
 c.Clear()
-SR1_SingleElePt.Draw()
-SR1_SingleElePt.SetTitle("EleChannel SR1;ele_Pt (GeV);")
+SR1_SingleMuPt.Draw()
+SR1_SingleMuPt.SetTitle("Muon Channel SR1;mu_Pt (GeV);")
 #gPad.SetLogy()
 #gPad.Update()
-c.Print("SR1_SingleEle.pdf","pdf")
+c.Print("SR1_SingleMu.pdf","pdf")
 
 
 c.Clear()
@@ -174,15 +174,15 @@ c.Print("SR1_SinglePhoEt.pdf","pdf")
 
 
 c.Clear()
-SR2_SingleElePt.Draw()
-SR2_SingleElePt.SetTitle("EleChannel SR2;ele_Pt (GeV);")
+SR2_SingleMuPt.Draw()
+SR2_SingleMuPt.SetTitle("MuonChannel SR2;mu_Pt (GeV);")
 #gPad.SetLogy()
 #gPad.Update()
-c.Print("SR2_SingleEle.pdf","pdf")
+c.Print("SR2_SingleMu.pdf","pdf")
 
 c.Clear()
 SR2MET.Draw()
-SR2MET.SetTitle("EleChannel SR2:MET;MET (GeV);")
+SR2MET.SetTitle("MuonChannel SR2:MET;MET (GeV);")
 #gPad.SetLogy()
 #gPad.Update()
 c.Print("SR2MET.pdf","pdf")

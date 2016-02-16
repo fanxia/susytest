@@ -84,17 +84,17 @@ for i in range(n_events):
     n_tightEle=0
     n_looseEle=0
     for e in range(chain_in.nEle):
-        if chain_in.elePt[e]>30 and (chain_in.eleIDbit[e]>>3&1)==1:
+        if chain_in.elePt[e]>30 and (chain_in.eleIDbit[e]>>3&1)==1 and abs(chain_in.eleEta[e])<2.5:
             n_tightEle+=1
             ele_ind=e
-        if chain_in.elePt[e]>10 and (chain_in.eleIDbit[e]>>1&1)==1:
+        if chain_in.elePt[e]>10 and (chain_in.eleIDbit[e]>>1&1)==1 and abs(chain_in.eleEta[e])<2.5:
             n_looseEle+=1
     if n_tightEle !=1 or n_looseEle !=1:
         continue
 
     n_looseMu=0
     for m in range(chain_in.nMu):
-        if chain_in.muPt[m]>10 and abs(chain_in.muEta[m])<2.5:
+        if chain_in.muPt[m]>10 and abs(chain_in.muEta[m])<2.5 and (chain_in.muIsLooseID[m])==1:
             n_looseMu+=1
     if n_looseMu !=0:
         continue
