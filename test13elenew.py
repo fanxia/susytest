@@ -10,12 +10,12 @@ from ROOT import *
 
 sw = ROOT.TStopwatch()
 sw.Start()
-
-chain_in = ROOT.TChain("ggNtuplizer/EventTree")
-chain_in.Add("root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/SilverJSON/job_data_ggNtuple_SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD.root")
+print "start"
+chain_in = ROOT.TChain("ggNtuplizer/EventTree_pre")
+#chain_in.Add("root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/SilverJSON/job_data_ggNtuple_SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD.root")
 #chain_in.Add("data/SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD__data_example.root")
-#chain_in.Add("SingleEle_v1/reduced_singleEle.root")
-chain_in.SetBranchStatus("tau*",0)
+chain_in.Add("SingleEle_pre/reduced_singleEle.root")
+#chain_in.SetBranchStatus("tau*",0)
 n_events = chain_in.GetEntries()
 print"Total events for processing: ",n_events
 
@@ -28,7 +28,7 @@ SR1_SingleElePt = ROOT.TH1F("SR1_SingleElePt","SR1_SingleElePt",100,0,1000)
 SinglePhoEt = ROOT.TH1F("SinglePhoEt","SinglePhoEt",100,0,1000)
 SR1MET = ROOT.TH1F("SR1MET","SR1MET",100,0,1000)
 SR1_LeadBjetPt = ROOT.TH1F("SR1_LeadBjetPt","SR1_LeadBjetPt",100,0,1000)
-SR1_nJet_nbJet = ROOT.TH2F("SR1_nJet_nbJet","SR1_nJet_nbJet",10,0,10,15,0,15)
+SR1_nJet_nbJet = ROOT.TH2F("SR1_nJet_nbJet","SR1_nJet_nbJet",15,0,15,10,0,10)
 
 
 SR2_SingleElePt = ROOT.TH1F("SR2_SingleElePt","SR2_SingleElePt",100,0,1000)
@@ -39,7 +39,7 @@ diPhotonM_MET = ROOT.TH2F("diPhotonM_MET","diPhotonM_MET",100,0,1000,100,0,1000)
 SR2_LeadBjetPt = ROOT.TH1F("SR2_LeadBjetPt","SR2_LeadBjetPt",100,0,1000)
 LeadPhoEt = ROOT.TH1F("LeadPhoEt","LeadPhoEt",100,0,1000)
 TrailPhoEt = ROOT.TH1F("TrailPhoEt","TrailPhoEt",100,0,1000)
-SR2_nJet_nbJet = ROOT.TH2F("SR2_nJet_nbJet","SR2_nJet_nbJet",10,0,10,15,0,15)
+SR2_nJet_nbJet = ROOT.TH2F("SR2_nJet_nbJet","SR2_nJet_nbJet",15,0,15,10,0,10)
 #------------
 
 
@@ -128,8 +128,8 @@ for i in range(n_events):
     pholist2=[]
     for p1 in pholist1:
         dRphoton_ele = ((chain_in.phoEta[p1]-chain_in.eleEta[ele_ind])**2+(chain_in.phoPhi[p1]-chain_in.elePhi[ele_ind])**2)**0.5
-#        if dRphoton_ele<=0.7:
-#            continue
+        if dRphoton_ele<=0.7:
+            continue
         pholist2.append(p1)
         
     pholist3=[]
@@ -137,9 +137,9 @@ for i in range(n_events):
         w = 1
         for j in jetlist:
             dRphoton_jet = ((chain_in.phoEta[p2]-chain_in.jetEta[j])**2+(chain_in.phoPhi[p2]-chain_in.jetPhi[j])**2)**0.5
-            if dRphoton_jet<=0.7:
+#            if dRphoton_jet<=0.7:
 #                w=0
-                break
+#                break
         if w==1:
             pholist3.append(p2)
 
@@ -149,7 +149,7 @@ for i in range(n_events):
         for p4 in pholist3:
             dRphoton_photon = ((chain_in.phoEta[p3]-chain_in.phoEta[p4])**2+(chain_in.phoPhi[p3]-chain_in.phoPhi[p4])**2)**0.5
             if dRphoton_photon<=0.5 and p4!=p3:
-#                w=0
+                w=0
                 break
         if w==1:
             pholist.append(p3)
