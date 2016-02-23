@@ -13,10 +13,10 @@ sw = ROOT.TStopwatch()
 sw.Start()
 print "start"
 chain_in = ROOT.TChain("ggNtuplizer/EventTree_pre")
-#chain_in.Add("root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/SilverJSON/job_data_ggNtuple_SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD.root")
+chain_in.Add("root://xrootd-cms.infn.it//store/group/phys_smp/ggNtuples/13TeV/data/V07_04_14_00/SilverJSON/job_data_ggNtuple_SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD.root")
 #chain_in.Add("data/SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD__data_example.root")
-chain_in.Add("SingleEle_pre/reduced_singleEle.root")
-#chain_in.SetBranchStatus("tau*",0)
+#chain_in.Add("SingleEle_pre/reduced_singleEle.root")
+chain_in.SetBranchStatus("tau*",0)
 n_events = chain_in.GetEntries()
 print"Total events for processing: ",n_events
 
@@ -25,33 +25,28 @@ os.chdir("SingleEle_v3")
 
 
 #------------
-sr1bins = array('d',[0,20,40,60,80,100,120,140,160,180,200,250,300,400,500,600,800,1000])
-SR1_SingleElePt = ROOT.TH1F("SR1_SingleElePt","SR1_SingleElePt",17,sr1bins)
-SinglePhoEt = ROOT.TH1F("SinglePhoEt","SinglePhoEt",17,sr1bins)
-sr1metxbins =array('d',[0,10,20,30,40,50,75,100,150,300,800])
-SR1MET = ROOT.TH1F("SR1MET","SR1MET",10,sr1metxbins)
-SR1_LeadBjetPt = ROOT.TH1F("SR1_LeadBjetPt","SR1_LeadBjetPt",17,sr1bins)
+
+SR1_SingleElePt = ROOT.TH1F("SR1_SingleElePt","SR1_SingleElePt",100,0,1000)
+SinglePhoEt = ROOT.TH1F("SinglePhoEt","SinglePhoEt",100,0,1000)
+SR1MET = ROOT.TH1F("SR1MET","SR1MET",100,0,1000)
+SR1_LeadBjetPt = ROOT.TH1F("SR1_LeadBjetPt","SR1_LeadBjetPt",100,0,1000)
 SR1_nJet_nbJet = ROOT.TH2F("SR1_nJet_nbJet","SR1_nJet_nbJet",15,0,15,10,0,10)
 #SR1_nJet_nbJet_ratio = ROOT.TH2F("SR1_nJet_nbJet_ratio","SR1_nJet_nbJet_ratio",15,0,15,10,0,10)
 
 
-sr2bins = array('d',[0,25,50,100,150,200,400,600,1000])
-SR2_SingleElePt = ROOT.TH1F("SR2_SingleElePt","SR2_SingleElePt",8,sr2bins)
-diPhotonM = ROOT.TH1F("diPhotonM","diPhotonM",8,sr2bins)
-sr2metxbins=array('d',[0,20,50,100,800])
-SR2MET = ROOT.TH1F("SR2MET","SR2MET",4,sr2metxbins)
+
+SR2_SingleElePt = ROOT.TH1F("SR2_SingleElePt","SR2_SingleElePt",100,0,1000)
+diPhotonM = ROOT.TH1F("diPhotonM","diPhotonM",100,0,1000)
+SR2MET = ROOT.TH1F("SR2MET","SR2MET",100,0,1000)
 SR2nPho = ROOT.TH1F("SR2nPho","SR2nPho",5,0,5)
 diPhotonM_MET = ROOT.TH2F("diPhotonM_MET","diPhotonM_MET",100,0,1000,100,0,1000)
-SR2_LeadBjetPt = ROOT.TH1F("SR2_LeadBjetPt","SR2_LeadBjetPt",8,sr2bins)
-LeadPhoEt = ROOT.TH1F("LeadPhoEt","LeadPhoEt",8,sr2bins)
-TrailPhoEt = ROOT.TH1F("TrailPhoEt","TrailPhoEt",8,sr2bins)
+SR2_LeadBjetPt = ROOT.TH1F("SR2_LeadBjetPt","SR2_LeadBjetPt",100,0,1000)
+LeadPhoEt = ROOT.TH1F("LeadPhoEt","LeadPhoEt",100,0,1000)
+TrailPhoEt = ROOT.TH1F("TrailPhoEt","TrailPhoEt",100,0,1000)
 SR2_nJet_nbJet = ROOT.TH2F("SR2_nJet_nbJet","SR2_nJet_nbJet",15,0,15,10,0,10)
 #SR2_nJet_nbJet_ratio = ROOT.TH2F("SR2_nJet_nbJet_ratio","SR2_nJet_nbJet_ratio",15,0,15,10,0,10)
 #------------
 
-SR18vs13= ROOT.TH1F("SR18-13","SR18-13",10,sr1metxbins)
-fl=TFile.Open("../8vs13/histograms_ele_bjj_SR1.root")
-SR1met=fl.Get("pfMET_t01_gg_ele_bjj")
 file_out = ROOT.TFile("reduced_singleEle.root","recreate")
 dir_out = file_out.mkdir("ggNtuplizer")
 #dir2_out = file_out.mkdir("ggNtuplizer_SR2")
@@ -212,72 +207,50 @@ print "----------------------"
 
 c=ROOT.TCanvas("c","Plots",800,800)
 c.cd()
-for i in range(1,11):
-    SR1MET.SetBinContent(i,SR1MET.GetBinContent(i)/SR1MET.GetBinWidth(i))
 SR1MET.Draw("e")
-SR1MET.SetTitle("EleChannel SR1:MET;MET (GeV); Event Number/GeV")
-gStyle.SetOptStat(0)
+SR1MET.SetTitle("EleChannel SR1:MET;MET (GeV);")
 gPad.SetLogy()
 gPad.Update()
 c.Print("SR1MET.pdf","pdf")
 
-#-----------
-c.Clear()
-#SR18vs13=SR1MET.Divide(SR1met)
-SR1MET.Divide(SR1met)
-SR1MET.Draw()
-c.Print("SR1metvs.pdf","pdf")
 
 c.Clear()
-for i in range(1,18):
-    SR1_SingleElePt.SetBinContent(i,SR1_SingleElePt.GetBinContent(i)/SR1_SingleElePt.GetBinWidth(i))
 SR1_SingleElePt.Draw()
-SR1_SingleElePt.SetTitle("EleChannel SR1;ele_Pt (GeV/c); Event Number/GeV")
-gStyle.SetOptStat(0)
+SR1_SingleElePt.SetTitle("EleChannel SR1;ele_Pt (GeV/c);")
 #gPad.SetLogy()
 #gPad.Update()
 c.Print("SR1_SingleEle.pdf","pdf")
 
 
 c.Clear()
-for i in range(1,18):
-    SinglePhoEt.SetBinContent(i,SinglePhoEt.GetBinContent(i)/SinglePhoEt.GetBinWidth(i))
 SinglePhoEt.Draw()
-SinglePhoEt.SetTitle("SR1: #gamma;#gamma_{Et} (GeV); Event Number/GeV")
+SinglePhoEt.SetTitle("SR1: #gamma;#gamma_{Et} (GeV);")
 #gPad.SetLogy()
 #gPad.Update()
 c.Print("SR1_SinglePhoEt.pdf","pdf")
 
 c.Clear()
-for i in range(1,18):
-    SR1_LeadBjetPt.SetBinContent(i,SR1_LeadBjetPt.GetBinContent(i)/SR1_LeadBjetPt.GetBinWidth(i))
 SR1_LeadBjetPt.Draw()
-SR1_LeadBjetPt.SetTitle("SR1;Lead bjet_Pt (GeV/c); Event Number/GeV")
+SR1_LeadBjetPt.SetTitle("SR1;Lead bjet_Pt (GeV/c);")
 c.Print("SR1_LeadBjetPt.pdf","pdf")
 
 c.Clear()
-for i in range(1,9):
-    SR2_SingleElePt.SetBinContent(i,SR2_SingleElePt.GetBinContent(i)/SR2_SingleElePt.GetBinWidth(i))
 SR2_SingleElePt.Draw()
-SR2_SingleElePt.SetTitle("EleChannel SR2;ele_Pt (GeV/c); Event Number/GeV")
+SR2_SingleElePt.SetTitle("EleChannel SR2;ele_Pt (GeV/c);")
 #gPad.SetLogy()
 #gPad.Update()
 c.Print("SR2_SingleElePt.pdf","pdf")
 
 c.Clear()
-for i in range(1,5):
-    SR2MET.SetBinContent(i,SR2MET.GetBinContent(i)/SR2MET.GetBinWidth(i))
 SR2MET.Draw("e")
-SR2MET.SetTitle("EleChannel SR2:MET;MET (GeV);Event Number/GeV")
+SR2MET.SetTitle("EleChannel SR2:MET;MET (GeV);")
 gPad.SetLogy()
 gPad.Update()
 c.Print("SR2MET.pdf","pdf")
 
 c.Clear()
-for i in range(1,9):
-    diPhotonM.SetBinContent(i,diPhotonM.GetBinContent(i)/diPhotonM.GetBinWidth(i))
 diPhotonM.Draw("e")
-diPhotonM.SetTitle("SR2: #gamma#gamma;m_{#gamma#gamma} (GeV); Event Number/GeV")
+diPhotonM.SetTitle("SR2: #gamma#gamma;m_{#gamma#gamma} (GeV);")
 #gPad.SetLogy()
 #gPad.Update()
 c.Print("SR2_diPhotonM.pdf","pdf")
@@ -288,29 +261,23 @@ SR2nPho.SetTitle("SR2;n_Photon;")
 c.Print("SR2nPho.pdf","pdf")
 
 c.Clear()
-for i in range(1,9):
-    LeadPhoEt.SetBinContent(i,LeadPhoEt.GetBinContent(i)/LeadPhoEt.GetBinWidth(i))
 LeadPhoEt.Draw()
-LeadPhoEt.SetTitle("SR2:Lead #gamma;Lead #gamma_Et(GeV); Event Number/GeV")
+LeadPhoEt.SetTitle("SR2:Lead #gamma;Lead #gamma_Et(GeV);")
 #gPad.SetLogy()
 #gPad.Update()
 c.Print("SR2_LeadPhoEt.pdf","pdf")
 
 c.Clear()
-for i in range(1,9):
-    TrailPhoEt.SetBinContent(i,TrailPhoEt.GetBinContent(i)/TrailPhoEt.GetBinWidth(i))
 TrailPhoEt.Draw()
-TrailPhoEt.SetTitle("SR2:Trail #gamma;Trail #gamma_Et(GeV); Event Number/GeV")
+TrailPhoEt.SetTitle("SR2:Trail #gamma;Trail #gamma_Et(GeV);")
 #gPad.SetLogy()
 #gPad.Update()
 c.Print("SR2_TrailPhoEt.pdf","pdf")
 
 
 c.Clear()
-for i in range(1,9):
-    SR2_LeadBjetPt.SetBinContent(i,SR2_LeadBjetPt.GetBinContent(i)/SR2_LeadBjetPt.GetBinWidth(i))
 SR2_LeadBjetPt.Draw()
-SR2_LeadBjetPt.SetTitle("SR2;Lead bjet_Pt (GeV/c); Event Number/GeV")
+SR2_LeadBjetPt.SetTitle("SR2;Lead bjet_Pt (GeV/c);")
 c.Print("SR2_LeadBjetPt.pdf","pdf")
 
 c.Clear()
