@@ -8,12 +8,14 @@ import sys
 import ROOT
 from ROOT import *
 from array import array
+from ana_mu import muPFRelCombIso
 
 sw = ROOT.TStopwatch()
 sw.Start()
 print "start"
-chain_in = ROOT.TChain("ggNtuplizer/EventTree")
-chain_in.Add("root://eoscms//eos/cms/store/group/phys_smp/ggNtuples/13TeV/mc/job_spring15_ggNtuple_TTJets_amcatnlo_pythia8_25ns_miniAOD.root")
+chain_in = ROOT.TChain("ggNtuplizer/EventTree_pre")
+chain_in.Add("ttjets_v1/reduced_singleEle.root")
+#chain_in.Add("root://eoscms//eos/cms/store/group/phys_smp/ggNtuples/13TeV/mc/job_spring15_ggNtuple_TTJets_amcatnlo_pythia8_25ns_miniAOD.root")
 #chain_in.Add("root://eoscms///eos/cms/store/group/phys_smp/ggNtuples/13TeV/mc/job_spring15_ggNtuple_WJetsToLNu_amcatnlo_pythia8_25ns_miniAOD.root")
 #chain_in.Add("data/SingleElectron_Run2015D_PromptReco-v4_25ns_JSON_Silver_1915pb_miniAOD__data_example.root")
 #chain_in.Add("SingleEle_pre/reduced_singleEle.root")
@@ -22,8 +24,8 @@ n_events = chain_in.GetEntries()
 print"Total events for processing: ",n_events
 
 #os.mkdir("ttjets_v1",0755)
-os.system('mkdir -p ttjets_v1')
-os.chdir("ttjets_v1")
+os.system('mkdir -p ttjets_v3')
+os.chdir("ttjets_v3")
 
 
 #------------
@@ -31,9 +33,10 @@ os.chdir("ttjets_v1")
 pre_SingleElePt = ROOT.TH1F("pre_SingleElePt","pre_SingleElePt",100,0,1000)
 pre_SingleEleEta = ROOT.TH1F("pre_SingleEleEta","pre_SingleEleEta",30,-3,3)
 pre_nPho = ROOT.TH1F("pre_nPho","pre_nPho",5,0,5)
+pre_nJet = ROOT.TH1F("pre_nJet","pre_nJet",15,0,15)
 preMET = ROOT.TH1F("preMET","preMET",100,0,1000)
 pre_LeadBjetPt = ROOT.TH1F("pre_LeadBjetPt","pre_LeadBjetPt",100,0,1000)
-pre_nJet_nbJet = ROOT.TH2F("pre_nJet_nbJet","pre_nJet_nbJet",15,0,15,10,0,10)
+pre_nJet_nbJet = ROOT.TH2F("pre_nJet_nbJet","pre_nJet_nbJet",20,0,20,10,0,10)
 
 
 
@@ -78,7 +81,7 @@ n_pre=0
 n_SR1=0
 n_SR2=0
 
-for i in range(10000):
+for i in range(n_events):
     chain_in.GetEntry(i)
     
     if i%100000 ==0:
@@ -105,7 +108,8 @@ for i in range(10000):
 
     n_looseMu=0
     for m in range(chain_in.nMu):
-        if chain_in.muPt[m]>10 and abs(chain_in.muEta[m])<2.5 and chain_in.muIsLooseID[m]==1:
+        muPFIso=muPFRelCombIso(chain_in.muPt[m],chain_in.muPFChIso[m],chain_in.muPFNeuIso[m],chain_in.muPFPhoIso[m],chain_in.muPFPUIso[m])
+        if chain_in.muPt[m]>10 and abs(chain_in.muEta[m])<2.5 and chain_in.muIsLooseID[m]==1 and muPFIso<0.25:
             n_looseMu+=1
     if n_looseMu !=0:
         continue
@@ -119,7 +123,7 @@ for i in range(10000):
     jetlist =[]
     bjetlist=[]
     for j in range(chain_in.nJet):
-        if chain_in.jetPt[j]>30 and abs(chain_in.jetEta[j])<2.4:
+        if chain_in.jetPt[j]>30 and abs(chain_in.jetEta[j])<2.4 and (chain_in.jetPFLooseId[j])==true:
             n_jet+=1
             jetlist.append(j)
             if chain_in.jetpfCombinedInclusiveSecondaryVertexV2BJetTags[j]>0.89:
@@ -136,7 +140,8 @@ for i in range(10000):
 #---------------------1+2+3+4.loose photon: singlepho  or diphoton
     pholist1 = [] 
     for p in range(chain_in.nPho):
-        if chain_in.phoEt[p]>=20 and abs(chain_in.phoEta[p])<=1.4442 and (chain_in.phoIDbit[p]>>0&1)==1 and (chain_in.phoEleVeto[p])==1 and chain_in.phoR9[p]<1.0 and chain_in.phoSigmaIPhiIPhi[p]>0.001 and chain_in.phoSigmaIEtaIEta[p]>0.001  and chain_in.phoSigmaIEtaIEta[p]<0.012:
+        if chain_in.phoEt[p]>=20 and abs(chain_in.phoEta[p])<=1.4442 and (chain_in.phoIDbit[p]>>0&1)==1 and (chain_in.phoEleVeto[p])==1:
+# and chain_in.phoR9[p]<1.0 and chain_in.phoSigmaIPhiIPhi[p]>0.001 and chain_in.phoSigmaIEtaIEta[p]>0.001  and chain_in.phoSigmaIEtaIEta[p]<0.012:
             pholist1.append(p)
 
 #---------------------photon dR loop----
@@ -176,7 +181,7 @@ for i in range(10000):
     pre_nJet_nbJet.Fill(n_jet,n_bjet)
     pre_LeadBjetPt.Fill(chain_in.jetPt[leadbjet_ind])
     preMET.Fill(chain_in.pfMET)
-
+    pre_nJet.Fill(n_jet)
 #-------------------------below for signal region1 &2
     if len(pholist)==1:
         singlepho_ind=pholist[0]
@@ -230,6 +235,9 @@ gPad.SetLogy()
 gPad.Update()
 c.Print("pre_nPho.pdf","pdf")
 
+c.Clear()
+pre_nJet.Draw()
+c.Print("pre_nJet.pdf","pdf")
 
 
 c.Clear()
